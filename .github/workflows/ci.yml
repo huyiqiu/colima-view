@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    env:
+      CLANG_MODULE_CACHE_PATH: ${{ github.workspace }}/.build/clang-module-cache
+      SWIFTPM_MODULECACHE_OVERRIDE: ${{ github.workspace }}/.build/swift-module-cache
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Show Swift version
+        run: swift --version
+      - name: Run unit tests
+        run: swift test --disable-sandbox
+      - name: Build and verify app
+        run: bash scripts/build-app.sh

@@ -1,0 +1,16 @@
+.build/
+dist/
+.DS_Store
+*.xcuserstate
+.swiftpm/
+xcuserdata/
+
+# Local verification notes and configuration
+/VALIDATION.md
+.env
+.env.*
+!.env.example
+*.p12
+*.p8
+.codex/
+.agents/
