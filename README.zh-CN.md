@@ -4,6 +4,18 @@
 
 原生 SwiftUI macOS 桌面客户端，复用本机 Colima / Docker CLI。最低支持 macOS 14，无第三方 Swift 依赖、账户或遥测。
 
+## 界面展示
+
+**存储占用**：集中查看 Mac 实际分配空间、虚拟机磁盘用量，以及 Docker 各类资源的占用与可回收量。
+
+![存储页：Mac 实际占用、虚拟机磁盘用量和 Docker 存储分类](docs/screenshots/storage.jpg)
+
+| 实例管理 | 创建容器 |
+| --- | --- |
+| ![实例页：当前 Colima 实例的状态、CPU、内存和磁盘容量](docs/screenshots/instances.jpg) | ![创建容器表单：Nginx 示例镜像、容器名称和本地端口映射](docs/screenshots/run-container.jpg) |
+
+截图展示默认的英文界面；容器表单使用示例配置。应用也支持简体中文。
+
 ## 使用
 
 需要已安装 Colima、Docker CLI，以及可用的 `docker compose` 和 `docker buildx`。首次从源码使用：

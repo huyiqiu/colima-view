@@ -9,6 +9,18 @@ English · [简体中文](README.zh-CN.md)
 
 A native macOS desktop and menu bar app for managing [Colima](https://colima.run/) and Docker. Built with SwiftUI, with no third-party Swift dependencies, accounts, or telemetry.
 
+## Screenshots
+
+**Storage usage** — see actual Mac allocation, VM disk usage, and Docker's storage breakdown in one place.
+
+![Storage page showing actual Mac allocation, VM disk usage, and Docker storage categories](docs/screenshots/storage.jpg)
+
+| Instance management | Run a container |
+| --- | --- |
+| ![Instance page showing the active Colima profile, status, CPU, memory, and disk capacity](docs/screenshots/instances.jpg) | ![Run container form with an example Nginx image, container name, and local port mapping](docs/screenshots/run-container.jpg) |
+
+Screenshots show the English interface. The container form uses an example configuration.
+
 ## Features
 
 - **Overview:** live container CPU and memory charts, engine information, running applications, and actual Mac storage usage.
