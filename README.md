@@ -9,6 +9,14 @@ English · [简体中文](README.zh-CN.md)
 
 A native macOS desktop and menu bar app for managing [Colima](https://colima.run/) and Docker. Built with SwiftUI, with no third-party Swift dependencies, accounts, or telemetry.
 
+## Download
+
+[Download Colima View v1.0.0 for Apple Silicon](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/Colima-View-1.0.0-macos-arm64.zip) · [All releases](https://github.com/huyiqiu/colima-view/releases) · [SHA-256 checksums](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/SHA256SUMS.txt)
+
+Requires macOS 14 or later. The prebuilt app currently supports Apple Silicon (M-series) Macs. Unzip the download and drag **Colima View.app** to **Applications**. Xcode is only needed to build from source. Colima, Docker CLI, Compose, and Buildx must still be installed separately; see the runtime setup below.
+
+The download is ad-hoc signed and **not notarized by Apple**. If macOS blocks the first launch, review [Apple's instructions for opening an app](https://support.apple.com/en-us/102445) and use **System Settings → Privacy & Security → Open Anyway** only if you trust this download.
+
 ## Screenshots
 
 **Storage usage** — see actual Mac allocation, VM disk usage, and Docker's storage breakdown in one place.
@@ -38,7 +46,7 @@ The app uses your existing Colima installation and virtual machines. Closing the
 ## Requirements
 
 - macOS 14 or later.
-- Xcode 16 or later, including its command line tools, to build from source.
+- Xcode 16 or later, including its command line tools, only to build from source.
 - Colima and Docker CLI, plus working `docker compose` and `docker buildx` commands.
 
 Tools are detected in `/opt/homebrew/bin` and `/usr/local/bin`. Other locations can be selected in **Settings → Connection**.
@@ -66,7 +74,7 @@ bash scripts/build-app.sh
 open "dist/Colima View.app"
 ```
 
-You can move the built app to Applications. The build script creates a locally ad-hoc signed app for the machine's architecture. This project does not provide a notarized release; public binary distribution requires appropriate Developer ID signing and notarization.
+You can move the built app to Applications. The build script creates an ad-hoc signed app for the machine's architecture. Run `bash scripts/package-release.sh` to build the app, package a versioned ZIP, and generate `dist/SHA256SUMS.txt`. Developer ID signing and Apple notarization are not currently configured.
 
 ## Storage and language
 

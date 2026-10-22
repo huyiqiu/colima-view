@@ -4,6 +4,14 @@
 
 原生 SwiftUI macOS 桌面客户端，复用本机 Colima / Docker CLI。最低支持 macOS 14，无第三方 Swift 依赖、账户或遥测。
 
+## 下载
+
+[下载 Colima View v1.0.0（Apple Silicon）](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/Colima-View-1.0.0-macos-arm64.zip) · [全部版本](https://github.com/huyiqiu/colima-view/releases) · [SHA-256 校验文件](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/SHA256SUMS.txt)
+
+需要 macOS 14 或更新版本；当前预编译包支持 Apple Silicon（M 系列）Mac。下载并解压，将 **Colima View.app** 拖入“应用程序”即可，无需安装 Xcode。Colima、Docker CLI、Compose 和 Buildx 仍需单独安装。
+
+下载包使用 ad-hoc 签名，**尚未通过 Apple 公证**。如果首次打开被 macOS 阻止，请先阅读 [Apple 的应用打开说明](https://support.apple.com/en-us/102445)，确认信任此下载后，在“系统设置 → 隐私与安全性”中选择“仍要打开”。
+
 ## 界面展示
 
 **存储占用**：集中查看 Mac 实际分配空间、虚拟机磁盘用量，以及 Docker 各类资源的占用与可回收量。
@@ -18,7 +26,7 @@
 
 ## 使用
 
-需要已安装 Colima、Docker CLI，以及可用的 `docker compose` 和 `docker buildx`。首次从源码使用：
+需要已安装 Colima、Docker CLI，以及可用的 `docker compose` 和 `docker buildx`。可直接下载上面的预编译应用；从源码构建时执行：
 
 ```bash
 git clone https://github.com/huyiqiu/colima-view.git
@@ -58,7 +66,7 @@ swift run --disable-sandbox colima-desk-check --smoke-test
 
 最后一项需要一个已经运行的 Docker profile 和本地 `hello-world` 镜像。它会使用随机名称验证容器生命周期、日志、Inspect、scratch 镜像构建、存储卷 / 网络和 Compose 部署，并清理所有测试资源；不下载额外镜像。
 
-`scripts/build-app.sh` 构建 Release 应用、生成图标并进行本机 ad-hoc 签名。跨机器公开分发时应另行使用 Developer ID 签名和 Apple 公证。
+`scripts/build-app.sh` 构建 Release 应用、生成图标并进行 ad-hoc 签名。执行 `bash scripts/package-release.sh` 可构建应用、生成带版本号的 ZIP 和 `dist/SHA256SUMS.txt` 校验文件。当前尚未配置 Developer ID 签名和 Apple 公证。
 
 ## 实现约定
 
