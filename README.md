@@ -11,7 +11,7 @@ A native macOS desktop and menu bar app for managing [Colima](https://colima.run
 
 ## Download
 
-[Download Colima View v1.0.0 for Apple Silicon](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/Colima-View-1.0.0-macos-arm64.zip) · [All releases](https://github.com/huyiqiu/colima-view/releases) · [SHA-256 checksums](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/SHA256SUMS.txt)
+[Download Colima View v1.1.0 for Apple Silicon](https://github.com/huyiqiu/colima-view/releases/download/v1.1.0/Colima-View-1.1.0-macos-arm64.zip) · [All releases](https://github.com/huyiqiu/colima-view/releases) · [SHA-256 checksums](https://github.com/huyiqiu/colima-view/releases/download/v1.1.0/SHA256SUMS.txt)
 
 Requires macOS 14 or later. The prebuilt app currently supports Apple Silicon (M-series) Macs. Unzip the download and drag **Colima View.app** to **Applications**. Xcode is only needed to build from source. Colima, Docker CLI, Compose, and Buildx must still be installed separately; see the runtime setup below.
 
@@ -27,12 +27,18 @@ The download is ad-hoc signed and **not notarized by Apple**. If macOS blocks th
 | --- | --- |
 | ![Instance page showing the active Colima profile, status, CPU, memory, and disk capacity](docs/screenshots/instances.jpg) | ![Run container form with an example Nginx image, container name, and local port mapping](docs/screenshots/run-container.jpg) |
 
+| Structured resource details | Native switches |
+| --- | --- |
+| ![Network details grouped into readable information and IP address management cards](docs/screenshots/network-details.jpg) | ![General settings with native switches for menu bar summaries and startup behavior](docs/screenshots/settings.jpg) |
+
 Screenshots show the English interface. The container form uses an example configuration.
 
 ## Features
 
 - **Overview:** live container CPU and memory charts, engine information, running applications, and actual Mac storage usage.
 - **Instances:** discover and switch profiles; create, start, stop, restart, resize, and delete instances.
+- **Details:** structured container, image, volume, and network information; readable port mappings, mounts, connections, startup configuration, and environment variables, with raw JSON available in a separate tab.
+- **Interface:** rounded action buttons, circular icon buttons, native switches, search, copy feedback, and keyboard shortcuts.
 - **Containers:** configure ports, mounts, environment variables, networks, restart policies, and commands; manage lifecycle, inspect, and view or export logs.
 - **Images:** pull, build from a Dockerfile, select platforms, inspect, delete, and clear unused images or build cache.
 - **Compose:** preview and deploy local files, then manage project services while preserving volumes.

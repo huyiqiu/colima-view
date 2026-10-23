@@ -47,7 +47,7 @@ struct ProfileEditor: View {
             Divider()
             HStack { Button(L("取消")) { dismiss() }.keyboardShortcut(.cancelAction); Spacer(); Button(profile == nil ? L("创建并启动") : L("保存配置")) {
                 if profile?.isRunning == true { confirmRestart = true } else { save() }
-            }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction).disabled(!valid || store.isBusy) }.padding(20)
+            }.buttonStyle(.deskPrimary).keyboardShortcut(.defaultAction).disabled(!valid || store.isBusy) }.padding(20)
         }.frame(width: 560, height: profile == nil ? 600 : 540)
             .confirmationDialog(L("保存并重启 \(name)？"), isPresented: $confirmRestart, titleVisibility: .visible) { Button(L("保存并重启")) { save() }; Button(L("取消"), role: .cancel) {} } message: { Text(L("该实例中的运行容器会短暂中断。已存储的数据会保留。")) }
     }
@@ -87,7 +87,7 @@ struct PullImageView: View {
             HStack { Button(L("取消")) { dismiss() }.keyboardShortcut(.cancelAction); Spacer(); Button(L("拉取镜像")) {
                 let args = ["pull"] + (platform.isEmpty ? [] : ["--platform", platform]) + ["--", reference]
                 dismiss(); store.dockerAction(L("拉取 \(reference)"), args: args, timeout: 1800)
-            }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction).disabled(!InputValidation.imageReference(reference)) }.padding(20)
+            }.buttonStyle(.deskPrimary).keyboardShortcut(.defaultAction).disabled(!InputValidation.imageReference(reference)) }.padding(20)
         }.frame(width: 540, height: 330)
     }
 }
@@ -146,10 +146,10 @@ struct RunContainerView: View {
                 Button(L("取消")) { dismiss() }.keyboardShortcut(.cancelAction)
                 Text(validation ?? "").font(.caption).foregroundStyle(.secondary).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
                 Button(L("运行容器"), systemImage: "play.fill") { run() }
-                    .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
+                    .buttonStyle(.deskPrimary).keyboardShortcut(.defaultAction)
                     .disabled(validation != nil || store.isBusy).fixedSize()
             }.padding(20)
-        }.frame(width: 660, height: 650)
+        }.frame(width: 700, height: 710).modernControls()
     }
     private var applicationSettings: some View {
         Card {
@@ -159,7 +159,7 @@ struct RunContainerView: View {
                     Text(L("镜像")).font(.callout.weight(.medium))
                     HStack(spacing: 10) {
                         TextField(L("镜像"), text: $image, prompt: Text("nginx:alpine")).labelsHidden().textFieldStyle(.roundedBorder)
-                        Menu(L("本地镜像")) {
+                        DeskMenu(title: L("本地镜像"), icon: "square.stack.3d.up") {
                             ForEach(store.images.filter { $0.Repository != "<none>" }) { local in
                                 Button(local.reference) { image = local.reference }
                             }
@@ -239,97 +239,6 @@ struct RunContainerView: View {
     }
 }
 
-struct ContainerDetailView: View {
-    @EnvironmentObject var store: AppStore
-    @Environment(\.dismiss) var dismiss
-    let container: DockerContainer
-    @State private var tab = 1
-    @State private var follow = true
-    @State private var text = ""
-    @State private var error: String?
-    @State private var filter = ""
-    var live: DockerContainer { store.containers.first { $0.ID == container.ID } ?? container }
-    var displayed: String { filter.isEmpty ? text : text.split(whereSeparator: \.isNewline).filter { $0.localizedCaseInsensitiveContains(filter) }.joined(separator: "\n") }
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Image(systemName: "shippingbox.fill").font(.title2).foregroundStyle(Palette.accent)
-                VStack(alignment: .leading, spacing: 6) { Text(container.Names).font(.title2.weight(.semibold)); Text(container.Image).font(.caption).foregroundStyle(.secondary) }
-                Spacer(); StatusBadge(text: live.isRunning ? L("运行中") : live.isPaused ? L("已暂停") : L("已停止"), color: live.isRunning ? .green : .secondary)
-                Button(L("完成")) { dismiss() }.keyboardShortcut(.cancelAction)
-            }.padding(24)
-            HStack {
-                Picker(L("详情"), selection: $tab) { Text(L("概览")).tag(0); Text(L("日志")).tag(1); Text("Inspect").tag(2) }.pickerStyle(.segmented).frame(width: 250)
-                Spacer()
-                if tab == 1 { TextField(L("过滤日志…"), text: $filter).textFieldStyle(.roundedBorder).frame(width: 160); Toggle(L("自动刷新"), isOn: $follow).toggleStyle(.checkbox) }
-                if tab != 0 { Button { copyText(displayed) } label: { Image(systemName: "doc.on.doc") }.help(L("复制内容")); Button { export() } label: { Image(systemName: "square.and.arrow.up") }.help(L("导出内容")) }
-            }.padding(.horizontal, 24).padding(.bottom, 16)
-            Divider()
-            if let error { Text(error).font(.caption).foregroundStyle(.orange).padding(10) }
-            if tab == 0 {
-                Form {
-                    LabeledContent(L("容器名称"), value: live.Names)
-                    LabeledContent(L("镜像"), value: live.Image)
-                    LabeledContent(L("容器 ID")) { Text(live.ID).font(.caption.monospaced()).textSelection(.enabled) }
-                    LabeledContent(L("状态"), value: live.Status)
-                    LabeledContent(L("端口"), value: live.Ports.isEmpty ? L("未发布端口") : live.Ports)
-                    if let project = live.project { LabeledContent(L("Compose 项目"), value: project) }
-                    HStack {
-                        Button(live.isRunning ? L("停止容器") : live.isPaused ? L("恢复容器") : L("启动容器")) { store.containerAction(live.isPaused ? "unpause" : live.isRunning ? "stop" : "start", live) }
-                        Button(L("重启容器")) { store.containerAction("restart", live) }
-                        ForEach(live.webPorts.prefix(2), id: \.self) { port in Link(L("打开 :\(port)"), destination: URL(string: "http://127.0.0.1:\(port)")!) }
-                    }.disabled(store.isBusy)
-                }.formStyle(.grouped)
-            } else {
-                ScrollViewReader { reader in
-                    ScrollView([.horizontal, .vertical]) {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text(displayed.isEmpty ? L("暂无输出") : displayed).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
-                            Color.clear.frame(height: 1).id("end")
-                        }.padding(16)
-                    }.background(Color(nsColor: .textBackgroundColor))
-                        .onChange(of: text) { _, _ in if tab == 1 && follow { reader.scrollTo("end", anchor: .bottom) } }
-                }
-            }
-        }.frame(width: 860, height: 610)
-            .task(id: "\(tab)-\(follow)") {
-                guard tab != 0 else { return }
-                text = ""; error = nil
-                repeat {
-                    guard !Task.isCancelled, let profile = store.currentProfile else { return }
-                    do {
-                        let output = tab == 1 ? try await store.service.logs(profile, container: container.ID) : try await store.service.inspect(profile, kind: "container", id: container.ID)
-                        if !Task.isCancelled { text = output; error = nil }
-                    } catch { if !Task.isCancelled { self.error = error.localizedDescription } }
-                    if !follow || tab != 1 { return }
-                    try? await Task.sleep(for: .seconds(3))
-                } while !Task.isCancelled
-            }
-    }
-    private func export() {
-        let panel = NSSavePanel()
-        panel.nameFieldStringValue = "\(container.Names).\(tab == 1 ? "log" : "json")"
-        if panel.runModal() == .OK, let url = panel.url {
-            do { try displayed.write(to: url, atomically: true, encoding: .utf8) }
-            catch { self.error = error.localizedDescription }
-        }
-    }
-}
-
-struct InspectView: View {
-    @EnvironmentObject var store: AppStore
-    @Environment(\.dismiss) var dismiss
-    let request: InspectRequest
-    @State private var text = L("正在读取…")
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack { Text(request.title).font(.headline).lineLimit(1); Spacer(); Button(L("复制")) { copyText(text) }; Button(L("完成")) { dismiss() }.keyboardShortcut(.cancelAction) }.padding(20)
-            Divider(); CodeBlock(text: text)
-        }.frame(width: 800, height: 570)
-            .task { guard let profile = store.currentProfile else { return }; do { text = try await store.service.inspect(profile, kind: request.kind, id: request.identifier) } catch { text = error.localizedDescription } }
-    }
-}
-
 struct ComposeDeployView: View {
     @EnvironmentObject var store: AppStore
     @Environment(\.dismiss) var dismiss
@@ -356,7 +265,7 @@ struct ComposeDeployView: View {
                 if !name.isEmpty { args += ["--project-name", name] }
                 args += ["up", "--detach"]
                 dismiss(); store.dockerAction(L("部署 Compose 项目"), args: args, timeout: 1800)
-            }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction).disabled(url == nil || (!name.isEmpty && !InputValidation.resourceName(name))) }.padding(20)
+            }.buttonStyle(.deskPrimary).keyboardShortcut(.defaultAction).disabled(url == nil || (!name.isEmpty && !InputValidation.resourceName(name))) }.padding(20)
         }.frame(width: 740, height: 590)
     }
 }
@@ -379,7 +288,7 @@ struct CreateResourceView: View {
             HStack { Button(L("取消")) { dismiss() }.keyboardShortcut(.cancelAction); Spacer(); Button(L("创建")) {
                 let args = kind == .volume ? ["volume", "create", "--", name] : ["network", "create", "--driver", "bridge"] + (internalNetwork ? ["--internal"] : []) + ["--", name]
                 dismiss(); store.dockerAction(L("创建\(kind == .volume ? L("存储卷") : L("网络")) \(name)"), args: args)
-            }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction).disabled(!InputValidation.resourceName(name)) }.padding(20)
+            }.buttonStyle(.deskPrimary).keyboardShortcut(.defaultAction).disabled(!InputValidation.resourceName(name)) }.padding(20)
         }.frame(width: 500, height: kind == .volume ? 260 : 330)
     }
 }

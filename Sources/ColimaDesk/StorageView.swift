@@ -105,6 +105,6 @@ struct StorageView: View {
         switch type { case "Images": return L("镜像"); case "Containers": return L("容器"); case "Local Volumes": return L("存储卷"); case "Build Cache": return L("构建缓存"); default: return type }
     }
     private func categoryIcon(_ type: String) -> String {
-        switch type { case "Images": return "square.3.layers.3d"; case "Containers": return "shippingbox"; case "Local Volumes": return "externaldrive"; default: return "hammer" }
+        switch type { case "Images": return "square.stack.3d.up"; case "Containers": return "shippingbox"; case "Local Volumes": return "externaldrive"; default: return "hammer" }
     }
 }

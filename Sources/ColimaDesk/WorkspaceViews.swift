@@ -10,7 +10,7 @@ struct ProfilesView: View {
             HStack {
                 Text(L("\(store.profiles.count) 个实例")).font(.callout).foregroundStyle(.secondary)
                 Spacer()
-                Button { create = true } label: { Label(L("新建实例"), systemImage: "plus") }.buttonStyle(.borderedProminent).disabled(store.isBusy)
+                Button { create = true } label: { Label(L("新建实例"), systemImage: "plus") }.buttonStyle(.deskPrimary).disabled(store.isBusy)
             }
             if store.profiles.isEmpty {
                 EmptyState(title: L("创建你的第一个实例"), description: L("每个实例有独立的 Docker 环境、镜像和数据盘。"), icon: "desktopcomputer", actionTitle: L("新建实例")) { create = true }
@@ -30,9 +30,9 @@ struct ProfilesView: View {
                                     }
                                     Spacer()
                                     HStack(spacing: 10) {
-                                        if profile.name != store.selectedProfileName { Button(L("切换")) { store.selectProfile(profile.name) }.buttonStyle(.bordered) }
-                                        Button { store.colimaAction(profile.isRunning ? "stop" : "start", profile: profile) } label: { Label(profile.isRunning ? L("停止") : L("启动"), systemImage: profile.isRunning ? "stop.fill" : "play.fill") }.buttonStyle(.bordered)
-                                        Menu {
+                                        if profile.name != store.selectedProfileName { Button(L("切换")) { store.selectProfile(profile.name) }.buttonStyle(.deskSecondary) }
+                                        Button { store.colimaAction(profile.isRunning ? "stop" : "start", profile: profile) } label: { Label(profile.isRunning ? L("停止") : L("启动"), systemImage: profile.isRunning ? "stop.fill" : "play.fill") }.buttonStyle(.deskSecondary)
+                                        ActionMenu {
                                             Button(L("调整资源…"), systemImage: "slider.horizontal.3") { editing = profile }
                                             Button(L("重启实例"), systemImage: "arrow.clockwise") { store.colimaAction("restart", profile: profile) }.disabled(!profile.isRunning)
                                             Button(L("在 Finder 中查看配置"), systemImage: "folder") { NSWorkspace.shared.open(FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".colima/\(profile.name)")) }
@@ -42,7 +42,7 @@ struct ProfilesView: View {
                                                     store.execute(L("删除实例 \(profile.name)"), specs: [CommandSpec(.colima, ["delete", "--force", "--profile", profile.name], timeout: 180)])
                                                 }
                                             }
-                                    } label: { Image(systemName: "ellipsis") }.menuStyle(.borderlessButton).menuIndicator(.hidden).frame(width: 25).help(L("更多操作"))
+                                    }
                                     }.disabled(store.isBusy)
                                 }
                             }
@@ -68,9 +68,9 @@ struct ContainersView: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack {
-                Picker(L("状态"), selection: $filter) { Text(L("全部 \(store.containers.count)")).tag(0); Text(L("运行中")).tag(1); Text(L("已停止 / 暂停")).tag(2) }.pickerStyle(.segmented).frame(width: 290)
+                Picker(L("状态"), selection: $filter) { Text(L("全部 \(store.containers.count)")).tag(0); Text(L("运行中")).tag(1); Text(L("已停止 / 暂停")).tag(2) }.pickerStyle(.segmented).labelsHidden().frame(width: 350)
                 Spacer()
-                Button { run = true } label: { Label(L("运行容器"), systemImage: "plus") }.buttonStyle(.borderedProminent).disabled(!store.dockerAvailable || store.isBusy)
+                Button { run = true } label: { Label(L("运行容器"), systemImage: "plus") }.buttonStyle(.deskPrimary).disabled(!store.dockerAvailable || store.isBusy)
             }
             if !store.dockerAvailable { EngineUnavailableView() }
             else if filtered.isEmpty { EmptyState(title: store.search.isEmpty ? L("这里还没有容器") : L("没有匹配的容器"), description: L("从本地镜像创建应用，或直接填写镜像名称运行。"), icon: "shippingbox", actionTitle: L("运行容器")) { run = true } }
@@ -80,7 +80,7 @@ struct ContainersView: View {
                         HStack { Text(L("容器 / 镜像")); Spacer(); Text(L("资源用量")).frame(width: 135, alignment: .leading); Text(L("操作")).frame(width: 130, alignment: .trailing) }.font(.caption).foregroundStyle(.secondary).padding(.horizontal, 18).padding(.vertical, 12)
                         ForEach(filtered) { container in
                             Divider()
-                            ContainerRow(container: container) { selected = container }.padding(.horizontal, 16).padding(.vertical, 15)
+                            ContainerRow(container: container) { selected = container }.padding(.horizontal, 16).padding(.vertical, 15).hoverSurface()
                         }
                     }.background(Palette.card, in: RoundedRectangle(cornerRadius: 12)).overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.line))
                 }
@@ -98,7 +98,7 @@ struct ContainerRow: View {
     var stats: ContainerStats? { store.stats.first { container.ID.hasPrefix($0.ID) || $0.ID.hasPrefix(container.ID) } }
     var body: some View {
         HStack(spacing: 13) {
-            Image(systemName: "shippingbox.fill").font(.system(size: 20)).foregroundStyle(container.isRunning ? Palette.accent : Color.secondary)
+            Image(systemName: "shippingbox").font(.system(size: 20, weight: .medium)).foregroundStyle(container.isRunning ? Palette.accent : Color.secondary)
                 .frame(width: 42, height: 42).background(Palette.accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
@@ -108,7 +108,9 @@ struct ContainerRow: View {
                 Text(container.Image).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 if !container.webPorts.isEmpty {
                     HStack(spacing: 9) { ForEach(container.webPorts.prefix(3), id: \.self) { port in
-                        Link(":\(port) ↗", destination: URL(string: "http://127.0.0.1:\(port)")!).font(.caption2)
+                        Link(destination: URL(string: "http://127.0.0.1:\(port)")!) {
+                            Label { Text(verbatim: ":\(port)") } icon: { Image(systemName: "arrow.up.right") }
+                        }.font(.caption2).buttonStyle(.deskQuiet)
                     } }
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
@@ -118,14 +120,14 @@ struct ContainerRow: View {
             }.font(.caption.monospacedDigit()).frame(width: 135, alignment: .leading)
             HStack(spacing: 9) {
                 SmallIconButton(title: container.isRunning ? L("停止") : container.isPaused ? L("恢复") : L("启动"), icon: container.isRunning ? "stop.fill" : "play.fill") { store.containerAction(container.isPaused ? "unpause" : container.isRunning ? "stop" : "start", container) }
-                SmallIconButton(title: L("日志与详情"), icon: "doc.text.magnifyingglass", action: detail)
-                Menu {
+                SmallIconButton(title: L("详情"), icon: "info", action: detail)
+                ActionMenu {
                     Button(L("重启"), systemImage: "arrow.clockwise") { store.containerAction("restart", container) }
                     Button(container.isPaused ? L("恢复") : L("暂停"), systemImage: "pause") { store.containerAction(container.isPaused ? "unpause" : "pause", container) }.disabled(!container.isRunning && !container.isPaused)
                     Button(L("复制容器 ID"), systemImage: "doc.on.doc") { copyText(container.ID) }
                     Divider()
                     Button(L("删除容器…"), systemImage: "trash", role: .destructive) { store.deleteContainer(container) }
-                                } label: { Image(systemName: "ellipsis") }.menuStyle(.borderlessButton).menuIndicator(.hidden).frame(width: 22).help(L("更多操作"))
+                                }
             }.frame(width: 130, alignment: .trailing).disabled(store.isBusy)
         }
     }
@@ -145,7 +147,7 @@ struct ImagesView: View {
             HStack {
                 Text(L("\(store.images.count) 个本地镜像")).font(.callout).foregroundStyle(.secondary)
                 Spacer()
-                Menu(L("清理")) {
+                DeskMenu(title: L("清理"), icon: "sparkles") {
                     Button(L("清理未使用的镜像…")) {
                         store.confirmation = Confirmation(title: L("清理未使用的镜像？"), message: L("所有未被容器引用的镜像会被删除，包括带有标签的镜像。之后使用时需要重新下载。"), button: L("清理镜像")) { store.dockerAction(L("清理未使用的镜像"), args: ["image", "prune", "--all", "--force"], timeout: 180) }
                     }
@@ -153,32 +155,32 @@ struct ImagesView: View {
                         store.confirmation = Confirmation(title: L("清理构建缓存？"), message: L("未使用的构建缓存会被删除，之后的构建可能需要更长时间。"), button: L("清理缓存")) { store.dockerAction(L("清理构建缓存"), args: ["builder", "prune", "--all", "--force"], timeout: 180) }
                     }
                 }.disabled(!store.dockerAvailable || store.isBusy)
-                Button { build = true } label: { Label(L("构建镜像"), systemImage: "hammer") }.buttonStyle(.bordered).disabled(!store.dockerAvailable || store.isBusy)
-                Button { pull = true } label: { Label(L("拉取镜像"), systemImage: "arrow.down") }.buttonStyle(.borderedProminent).disabled(!store.dockerAvailable || store.isBusy)
+                Button { build = true } label: { Label(L("构建镜像"), systemImage: "hammer") }.buttonStyle(.deskSecondary).disabled(!store.dockerAvailable || store.isBusy)
+                Button { pull = true } label: { Label(L("拉取镜像"), systemImage: "arrow.down") }.buttonStyle(.deskPrimary).disabled(!store.dockerAvailable || store.isBusy)
             }
             if !store.dockerAvailable { EngineUnavailableView() }
-            else if store.images.filter({ store.matches($0.Repository, $0.Tag, $0.ID) }).isEmpty { EmptyState(title: L("准备你的第一个镜像"), description: L("填写镜像名称，例如 nginx:alpine，即可下载到当前实例。"), icon: "square.3.layers.3d", actionTitle: L("拉取镜像")) { pull = true } }
+            else if store.images.filter({ store.matches($0.Repository, $0.Tag, $0.ID) }).isEmpty { EmptyState(title: L("准备你的第一个镜像"), description: L("填写镜像名称，例如 nginx:alpine，即可下载到当前实例。"), icon: "square.stack.3d.up", actionTitle: L("拉取镜像")) { pull = true } }
             else {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(store.images.filter { store.matches($0.Repository, $0.Tag, $0.ID) }) { image in
                             HStack(spacing: 14) {
-                                Image(systemName: "square.3.layers.3d").font(.title2).foregroundStyle(Palette.accent).frame(width: 36)
+                                Image(systemName: "square.stack.3d.up").font(.title2).foregroundStyle(Palette.accent).frame(width: 36)
                                 VStack(alignment: .leading, spacing: 6) {
                                     HStack { Text(image.Repository).font(.system(size: 13, weight: .semibold)); Text(image.Tag).font(.caption).padding(.horizontal, 6).padding(.vertical, 2).background(Palette.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 4)).foregroundStyle(Palette.accent) }
                                     Text("\(image.ID) · \(image.CreatedSince)").font(.caption).foregroundStyle(.secondary)
                                 }.frame(maxWidth: .infinity, alignment: .leading)
                                 Text(image.Size).font(.caption.monospacedDigit()).foregroundStyle(.secondary).frame(width: 80, alignment: .trailing)
-                                Button { run = ImageRunRequest(image: image.reference) } label: { Label(L("运行"), systemImage: "play.fill") }.buttonStyle(.bordered)
-                                Menu {
+                                Button { run = ImageRunRequest(image: image.reference) } label: { Label(L("运行"), systemImage: "play.fill") }.buttonStyle(.deskSecondary)
+                                ActionMenu {
                                     Button(L("镜像详情")) { inspect = InspectRequest(kind: "image", identifier: image.ID, title: image.reference) }
                                     Button(L("复制镜像名称")) { copyText(image.reference) }
                                     Divider()
                                     Button(L("删除镜像…"), role: .destructive) {
                                         store.confirmation = Confirmation(title: L("删除镜像 \(image.reference)？"), message: L("正在被容器使用的镜像不会被删除。"), button: L("删除镜像")) { store.dockerAction(L("删除镜像"), args: ["image", "rm", image.reference]) }
                                     }
-                                } label: { Image(systemName: "ellipsis") }.menuStyle(.borderlessButton).menuIndicator(.hidden).frame(width: 24).help(L("更多操作"))
-                            }.padding(18).disabled(store.isBusy)
+                                }
+                            }.padding(18).hoverSurface().disabled(store.isBusy)
                             Divider()
                         }
                     }.background(Palette.card, in: RoundedRectangle(cornerRadius: 12))
@@ -197,7 +199,7 @@ struct ComposeView: View {
     @State private var deploy = false
     var body: some View {
         VStack(spacing: 16) {
-            HStack { Text(L("\(store.snapshot?.projects.count ?? 0) 个项目")).foregroundStyle(.secondary).font(.callout); Spacer(); Button { deploy = true } label: { Label(L("部署项目"), systemImage: "plus") }.buttonStyle(.borderedProminent).disabled(!store.dockerAvailable || store.isBusy) }
+            HStack { Text(L("\(store.snapshot?.projects.count ?? 0) 个项目")).foregroundStyle(.secondary).font(.callout); Spacer(); Button { deploy = true } label: { Label(L("部署项目"), systemImage: "plus") }.buttonStyle(.deskPrimary).disabled(!store.dockerAvailable || store.isBusy) }
             if !store.dockerAvailable { EngineUnavailableView() }
             else if (store.snapshot?.projects ?? []).isEmpty { EmptyState(title: L("一次管理整个应用"), description: L("导入 Compose 文件，统一部署、启动和停止多个服务。"), icon: "square.stack.3d.up", actionTitle: L("部署 Compose 项目")) { deploy = true } }
             else {
@@ -210,14 +212,14 @@ struct ComposeView: View {
                                 Spacer()
                                 Button(L("启动")) { perform(project, ["up", "--detach"]) }
                                 Button(L("停止")) { perform(project, ["stop"]) }
-                                Menu {
+                                ActionMenu {
                                     Button(L("重启项目")) { perform(project, ["restart"]) }
                                     if let file = project.files.first { Button(L("在 Finder 中显示")) { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: file)]) } }
                                     Divider()
                                     Button(L("移除项目容器…"), role: .destructive) {
                                         store.confirmation = Confirmation(title: L("移除项目 \(project.Name) 的容器？"), message: L("项目容器和默认网络会被移除，存储卷与镜像保留。"), button: L("移除项目容器")) { perform(project, ["down"]) }
                                     }
-                                } label: { Image(systemName: "ellipsis") }.menuStyle(.borderlessButton).menuIndicator(.hidden).frame(width: 24).help(L("更多操作"))
+                                }
                             }.disabled(store.isBusy)
                         }
                     }
@@ -239,20 +241,20 @@ struct VolumesView: View {
     @State private var inspect: InspectRequest?
     var body: some View {
         VStack(spacing: 16) {
-            HStack { Text(L("容器的持久化数据")).font(.callout).foregroundStyle(.secondary); Spacer(); Button(L("查看存储占用"), systemImage: "chart.pie") { store.section = .storage }; Button(L("新建存储卷"), systemImage: "plus") { create = true }.buttonStyle(.borderedProminent).disabled(!store.dockerAvailable || store.isBusy) }
+            HStack { Text(L("容器的持久化数据")).font(.callout).foregroundStyle(.secondary); Spacer(); Button(L("查看存储占用"), systemImage: "chart.pie") { store.section = .storage }; Button(L("新建存储卷"), systemImage: "plus") { create = true }.buttonStyle(.deskPrimary).disabled(!store.dockerAvailable || store.isBusy) }
             if !store.dockerAvailable { EngineUnavailableView() }
             else if (store.snapshot?.volumes ?? []).isEmpty { EmptyState(title: L("暂无存储卷"), description: L("存储卷中的数据可以在容器删除后保留。"), icon: "externaldrive", actionTitle: L("新建存储卷")) { create = true } }
             else {
                 ScrollView { LazyVStack(spacing: 0) {
                     ForEach((store.snapshot?.volumes ?? []).filter { store.matches($0.Name, $0.Driver) }) { volume in
                         HStack(spacing: 14) {
-                            Image(systemName: "externaldrive.fill").font(.title2).foregroundStyle(Palette.accent).frame(width: 36)
+                            Image(systemName: "externaldrive").font(.title2).foregroundStyle(Palette.accent).frame(width: 36)
                             VStack(alignment: .leading, spacing: 6) { Text(volume.Name).font(.callout.weight(.medium)).lineLimit(1); Text("\(volume.Driver) · \(volume.Scope ?? "local")").font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading)
                             Button(L("详情")) { inspect = InspectRequest(kind: "volume", identifier: volume.Name, title: volume.Name) }
                             SmallIconButton(title: L("删除存储卷"), icon: "trash", role: .destructive) {
                                 store.confirmation = Confirmation(title: L("永久删除存储卷 \(volume.Name)？"), message: L("卷内所有数据将永久丢失。正在被容器使用的卷不会被删除。"), button: L("永久删除存储卷")) { store.dockerAction(L("删除存储卷"), args: ["volume", "rm", volume.Name]) }
                             }
-                        }.padding(18).disabled(store.isBusy)
+                        }.padding(18).hoverSurface().disabled(store.isBusy)
                         Divider()
                     }
                 }.background(Palette.card, in: RoundedRectangle(cornerRadius: 12)) }
@@ -269,7 +271,7 @@ struct NetworksView: View {
     @State private var inspect: InspectRequest?
     var body: some View {
         VStack(spacing: 16) {
-            HStack { Text(L("\(store.snapshot?.networks.count ?? 0) 个网络")).font(.callout).foregroundStyle(.secondary); Spacer(); Button(L("新建网络"), systemImage: "plus") { create = true }.buttonStyle(.borderedProminent).disabled(!store.dockerAvailable || store.isBusy) }
+            HStack { Text(L("\(store.snapshot?.networks.count ?? 0) 个网络")).font(.callout).foregroundStyle(.secondary); Spacer(); Button(L("新建网络"), systemImage: "plus") { create = true }.buttonStyle(.deskPrimary).disabled(!store.dockerAvailable || store.isBusy) }
             if !store.dockerAvailable { EngineUnavailableView() }
             else {
                 ScrollView { LazyVStack(spacing: 0) {
@@ -281,7 +283,7 @@ struct NetworksView: View {
                             SmallIconButton(title: L("删除网络"), icon: "trash", role: .destructive) {
                                 store.confirmation = Confirmation(title: L("删除网络 \(network.Name)？"), message: L("仍有容器连接的网络不会被删除。"), button: L("删除网络")) { store.dockerAction(L("删除网络"), args: ["network", "rm", network.ID]) }
                             }.disabled(network.isSystem)
-                        }.padding(18).disabled(store.isBusy)
+                        }.padding(18).hoverSurface().disabled(store.isBusy)
                         Divider()
                     }
                 }.background(Palette.card, in: RoundedRectangle(cornerRadius: 12)) }

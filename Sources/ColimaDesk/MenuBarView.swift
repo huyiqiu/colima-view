@@ -57,7 +57,7 @@ struct MenuBarView: View {
                 Image(systemName: "shippingbox.fill").foregroundStyle(.white).font(.title3).frame(width: 37, height: 37).background(Palette.accent.gradient, in: RoundedRectangle(cornerRadius: 10))
                 VStack(alignment: .leading, spacing: 3) { Text("Colima View").font(.headline); Text(store.activeOperation ?? L("你的本地容器工作空间")).font(.caption2).foregroundStyle(.secondary).lineLimit(1) }
                 Spacer()
-                Button { store.refresh() } label: { Image(systemName: "arrow.clockwise") }.buttonStyle(.plain).help(L("刷新")).disabled(store.isBusy || store.isRefreshing)
+                SmallIconButton(title: L("刷新"), icon: "arrow.clockwise") { store.refresh() }.disabled(store.isBusy || store.isRefreshing)
             }
             HStack {
                 Picker(L("实例"), selection: Binding(get: { store.selectedProfileName }, set: { store.selectProfile($0) })) {
@@ -74,8 +74,8 @@ struct MenuBarView: View {
             if store.connectionError != nil { Label(L("连接异常，请打开主窗口查看详情"), systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange) }
             if let profile = store.currentProfile {
                 HStack(spacing: 10) {
-                    Button { store.colimaAction(profile.isRunning ? "stop" : "start", profile: profile) } label: { Label(profile.isRunning ? L("停止实例") : L("启动实例"), systemImage: profile.isRunning ? "stop.fill" : "play.fill").frame(maxWidth: .infinity) }.buttonStyle(.borderedProminent)
-                    Button { store.colimaAction("restart", profile: profile) } label: { Image(systemName: "arrow.clockwise") }.buttonStyle(.bordered).disabled(!profile.isRunning)
+                    Button { store.colimaAction(profile.isRunning ? "stop" : "start", profile: profile) } label: { Label(profile.isRunning ? L("停止实例") : L("启动实例"), systemImage: profile.isRunning ? "stop.fill" : "play.fill").frame(maxWidth: .infinity) }.buttonStyle(.deskPrimary)
+                    SmallIconButton(title: L("重启实例"), icon: "arrow.clockwise") { store.colimaAction("restart", profile: profile) }.disabled(!profile.isRunning)
                 }.disabled(store.isBusy)
             }
             Divider()
@@ -88,16 +88,16 @@ struct MenuBarView: View {
                         Circle().fill(container.isRunning ? .green : .gray).frame(width: 6, height: 6)
                         VStack(alignment: .leading, spacing: 3) { Text(container.Names).font(.callout.weight(.medium)).lineLimit(1); Text(container.Image).font(.caption2).foregroundStyle(.secondary).lineLimit(1) }
                         Spacer()
-                        Button { store.containerAction(container.isPaused ? "unpause" : container.isRunning ? "stop" : "start", container) } label: { Image(systemName: container.isRunning ? "stop.fill" : "play.fill").frame(width: 20, height: 22) }.buttonStyle(.plain).help(container.isRunning ? L("停止容器") : L("启动容器")).disabled(store.isBusy)
+                        SmallIconButton(title: container.isPaused ? L("恢复容器") : container.isRunning ? L("停止容器") : L("启动容器"), icon: container.isRunning ? "stop.fill" : "play.fill") { store.containerAction(container.isPaused ? "unpause" : container.isRunning ? "stop" : "start", container) }.disabled(store.isBusy)
                     }
                 }
             }
             Divider()
             HStack {
-                Button { openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true) } label: { Label(L("打开主窗口"), systemImage: "macwindow") }.buttonStyle(.plain)
+                Button { openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true) } label: { Label(L("打开主窗口"), systemImage: "macwindow") }.buttonStyle(.deskQuiet)
                 Spacer()
-                Button { openSettings(); NSApp.activate(ignoringOtherApps: true) } label: { Image(systemName: "gearshape") }.buttonStyle(.plain).help(L("设置"))
-                Menu { Button(L("退出 Colima View")) { NSApp.terminate(nil) }; Text(L("退出客户端会保留运行中的虚拟机。")) } label: { Image(systemName: "ellipsis") }.menuStyle(.borderlessButton).menuIndicator(.hidden).frame(width: 20).help(L("更多操作"))
+                SmallIconButton(title: L("设置"), icon: "gearshape") { openSettings(); NSApp.activate(ignoringOtherApps: true) }
+                ActionMenu { Button(L("退出 Colima View")) { NSApp.terminate(nil) }; Text(L("退出客户端会保留运行中的虚拟机。")) }
             }.font(.callout)
         }.padding(20).frame(width: 365)
     }

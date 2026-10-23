@@ -17,7 +17,7 @@ struct ColimaDeskApp: App {
     }
     var body: some Scene {
         Window("Colima View", id: "main") {
-            MainWindow().environmentObject(store).tint(Palette.accent)
+            MainWindow().environmentObject(store).tint(Palette.accent).modernControls()
                 .environment(\.locale, Locale(identifier: appLanguage)).id(appLanguage)
                 .frame(minWidth: 1040, minHeight: 680)
                 .task { store.startPolling() }
@@ -26,11 +26,11 @@ struct ColimaDeskApp: App {
         .windowToolbarStyle(.unified)
         .commands { DeskCommands(store: store) }
         MenuBarExtra {
-            MenuBarView().environmentObject(store).tint(Palette.accent)
+            MenuBarView().environmentObject(store).tint(Palette.accent).modernControls()
                 .environment(\.locale, Locale(identifier: appLanguage)).id(appLanguage).task { store.startPolling() }
         } label: { MenuBarLabel().environmentObject(store).id(appLanguage) }
         .menuBarExtraStyle(.window)
-        Settings { AppSettingsView().environmentObject(store).tint(Palette.accent).environment(\.locale, Locale(identifier: appLanguage)).id(appLanguage) }
+        Settings { AppSettingsView().environmentObject(store).tint(Palette.accent).modernControls().environment(\.locale, Locale(identifier: appLanguage)).id(appLanguage) }
     }
 }
 
@@ -47,8 +47,9 @@ struct DeskCommands: Commands {
 
 struct MainWindow: View {
     @EnvironmentObject var store: AppStore
+    @State private var columns: NavigationSplitViewVisibility = .all
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columns) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 11) {
                     Image(systemName: "shippingbox.fill").font(.system(size: 23, weight: .medium)).foregroundStyle(.white)
@@ -78,11 +79,12 @@ struct MainWindow: View {
                         Circle().fill(store.currentProfile?.isRunning == true ? Color.green : .gray).frame(width: 7, height: 7)
                         Text(store.currentProfile?.isRunning == true ? L("Colima 正在运行") : L("Colima 已停止")).font(.caption)
                         Spacer()
-                        SettingsLink { Image(systemName: "gearshape").foregroundStyle(.secondary) }.buttonStyle(.plain).help(L("设置"))
+                        SettingsLink { Image(systemName: "gearshape") }.buttonStyle(.deskIcon).help(L("设置")).accessibilityLabel(L("设置"))
                     }
                     if let version = store.snapshot?.info.ServerVersion { Text("Docker Engine \(version)").font(.caption2).foregroundStyle(.secondary) }
                 }.padding(20)
             }.navigationSplitViewColumnWidth(min: 210, ideal: 225, max: 250)
+                .toolbar(removing: .sidebarToggle)
         } detail: {
             VStack(spacing: 0) {
                 HStack(alignment: .center) {
@@ -92,7 +94,7 @@ struct MainWindow: View {
                     }
                     Spacer()
                     if ![.overview, .storage, .activity].contains(store.section) {
-                        TextField(L("搜索\(store.section.title)…"), text: $store.search).textFieldStyle(.roundedBorder).frame(width: 220)
+                        DeskSearchField(title: L("搜索\(store.section.title)…"), text: $store.search).frame(width: 240)
                     }
                 }.padding(.horizontal, 28).padding(.top, 25).padding(.bottom, 22)
                 if let error = store.connectionError {
@@ -100,7 +102,7 @@ struct MainWindow: View {
                         Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                         Text(error).font(.caption).textSelection(.enabled).lineLimit(3)
                         Spacer()
-                        Button(L("重试")) { store.refresh() }.buttonStyle(.borderless)
+                        Button(L("重试")) { store.refresh() }.buttonStyle(.deskQuiet)
                     }.padding(12).background(Color.orange.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 9)).padding(.horizontal, 28).padding(.bottom, 12)
                 }
                 Group {
@@ -122,7 +124,7 @@ struct MainWindow: View {
                         ProgressView().controlSize(.small)
                         Text(store.activeOperation ?? L("正在处理…")).font(.caption)
                         Spacer()
-                        Button(L("查看进度")) { store.showProgress = true }.font(.caption).buttonStyle(.borderless)
+                        Button(L("查看进度")) { store.showProgress = true }.font(.caption).buttonStyle(.deskQuiet)
                     } else {
                         Image(systemName: "checkmark.circle").foregroundStyle(store.connectionError == nil ? Color.secondary : .orange)
                         Text(store.isRefreshing ? L("正在刷新…") : L("本地连接 · \(store.selectedProfileName)")).font(.caption).foregroundStyle(.secondary)
@@ -132,10 +134,14 @@ struct MainWindow: View {
                 }.padding(.horizontal, 24).frame(height: 37)
             }.background(Palette.canvas)
             .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    SmallIconButton(title: L("切换侧边栏"), icon: "sidebar.left") { columns = columns == .detailOnly ? .all : .detailOnly }
+                        .keyboardShortcut("s", modifiers: [.command, .control])
+                }
                 ToolbarItem(placement: .principal) { Text("\(store.selectedProfileName) / \(store.section.title)").font(.caption).foregroundStyle(.secondary) }
                 ToolbarItem(placement: .primaryAction) {
-                    Button { store.refresh() } label: { Image(systemName: "arrow.clockwise") }
-                        .help(L("刷新状态 ⌘R")).disabled(store.isRefreshing || store.isBusy)
+                    SmallIconButton(title: L("刷新状态 ⌘R"), icon: "arrow.clockwise") { store.refresh() }
+                        .disabled(store.isRefreshing || store.isBusy)
                 }
             }
         }

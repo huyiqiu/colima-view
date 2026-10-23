@@ -18,8 +18,8 @@ struct DashboardView: View {
                     Spacer()
                     if let profile = store.currentProfile {
                         Button { store.colimaAction(profile.isRunning ? "stop" : "start", profile: profile) } label: { Label(profile.isRunning ? L("停止实例") : L("启动实例"), systemImage: profile.isRunning ? "stop.fill" : "play.fill") }
-                            .buttonStyle(.bordered).disabled(store.isBusy)
-                    } else { Button(L("管理实例")) { store.section = .profiles }.buttonStyle(.borderedProminent) }
+                            .buttonStyle(.deskSecondary).disabled(store.isBusy)
+                    } else { Button(L("管理实例")) { store.section = .profiles }.buttonStyle(.deskPrimary) }
                 }
                 HStack(spacing: 14) {
                     ResourceCard(title: L("运行中容器"), value: "\(store.runningContainers.count)", detail: L("共 \(store.containers.count) 个容器"), icon: "shippingbox")
@@ -48,7 +48,7 @@ struct DashboardView: View {
                 }
                 HStack(alignment: .top, spacing: 18) {
                     Card {
-                        SectionHeading(L("运行中的应用")) { Button(L("查看全部")) { store.section = .containers }.buttonStyle(.borderless).font(.caption) }
+                        SectionHeading(L("运行中的应用")) { Button(L("查看全部")) { store.section = .containers }.buttonStyle(.deskQuiet).font(.caption) }
                         if store.runningContainers.isEmpty {
                             VStack(spacing: 8) { Image(systemName: "shippingbox").font(.title2); Text(L("还没有运行中的容器")).font(.callout); Text(L("从镜像创建容器，或部署 Compose 项目。")).font(.caption).foregroundStyle(.secondary) }.foregroundStyle(.secondary).frame(maxWidth: .infinity).frame(height: 135)
                         } else {

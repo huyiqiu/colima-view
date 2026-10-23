@@ -6,7 +6,7 @@
 
 ## 下载
 
-[下载 Colima View v1.0.0（Apple Silicon）](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/Colima-View-1.0.0-macos-arm64.zip) · [全部版本](https://github.com/huyiqiu/colima-view/releases) · [SHA-256 校验文件](https://github.com/huyiqiu/colima-view/releases/download/v1.0.0/SHA256SUMS.txt)
+[下载 Colima View v1.1.0（Apple Silicon）](https://github.com/huyiqiu/colima-view/releases/download/v1.1.0/Colima-View-1.1.0-macos-arm64.zip) · [全部版本](https://github.com/huyiqiu/colima-view/releases) · [SHA-256 校验文件](https://github.com/huyiqiu/colima-view/releases/download/v1.1.0/SHA256SUMS.txt)
 
 需要 macOS 14 或更新版本；当前预编译包支持 Apple Silicon（M 系列）Mac。下载并解压，将 **Colima View.app** 拖入“应用程序”即可，无需安装 Xcode。Colima、Docker CLI、Compose 和 Buildx 仍需单独安装。
 
@@ -21,6 +21,10 @@
 | 实例管理 | 创建容器 |
 | --- | --- |
 | ![实例页：当前 Colima 实例的状态、CPU、内存和磁盘容量](docs/screenshots/instances.jpg) | ![创建容器表单：Nginx 示例镜像、容器名称和本地端口映射](docs/screenshots/run-container.jpg) |
+
+| 结构化资源详情 | 原生 switch 开关 |
+| --- | --- |
+| ![网络详情：分组展示基本信息和地址分配](docs/screenshots/network-details.jpg) | ![通用设置：菜单栏与启动选项使用原生 switch](docs/screenshots/settings.jpg) |
 
 截图展示默认的英文界面；容器表单使用示例配置。应用也支持简体中文。
 
@@ -44,6 +48,8 @@ open "dist/Colima View.app"
 
 - 概览：真实 CPU / 内存曲线、Mac 存储占用、运行容器、实例配置与引擎信息。
 - 实例：发现和切换多个 profile，启动、停止、重启、新建、调整资源、删除。数据盘禁止缩小；删除实例会删除其内部数据，操作前有确认。
+- 详情：容器、镜像、存储卷、网络默认以结构化卡片展示；端口、挂载、连接、启动配置和环境变量分组查看，原始 JSON 保留在独立标签页。
+- 界面：统一圆角按钮、圆形图标按钮、原生 switch、搜索、复制反馈和键盘快捷键。
 - 容器：搜索、状态过滤、创建、端口发布、卷挂载、环境变量、网络和重启策略；启停、重启、暂停、恢复和删除；日志自动刷新、搜索、复制、导出、Inspect 和端口打开。
 - 镜像：拉取、平台选择、从 Dockerfile 构建（上下文、标签、参数、缓存选项）、创建容器、详情、删除、清理未使用镜像和构建缓存。
 - Compose：文件预览与部署、启动、停止、重启、移除项目容器（保留卷）。

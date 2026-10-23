@@ -35,7 +35,7 @@ struct BuildImageView: View {
                 }
             }.formStyle(.grouped)
             Divider()
-            HStack { Button(L("取消")) { dismiss() }.keyboardShortcut(.cancelAction); Spacer(); Button(L("开始构建"), systemImage: "hammer") { build() }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction).disabled(!valid || store.isBusy) }.padding(20)
+            HStack { Button(L("取消")) { dismiss() }.keyboardShortcut(.cancelAction); Spacer(); Button(L("开始构建"), systemImage: "hammer") { build() }.buttonStyle(.deskPrimary).keyboardShortcut(.defaultAction).disabled(!valid || store.isBusy) }.padding(20)
         }.frame(width: 620, height: 560)
     }
     private func build() {

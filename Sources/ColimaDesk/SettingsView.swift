@@ -66,13 +66,13 @@ struct AppSettingsView: View {
                 Image(systemName: "shippingbox.fill").font(.system(size: 56)).foregroundStyle(Palette.accent)
                 Text("Colima View").font(.largeTitle.weight(.semibold))
                 Text(L("原生 macOS 容器工作空间")).foregroundStyle(.secondary)
-                Text(L("版本 1.0.0 · macOS 14+")).font(.caption).foregroundStyle(.secondary)
+                Text(L("版本 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—") · macOS 14+")).font(.caption).foregroundStyle(.secondary)
                 Divider().frame(width: 200)
                 Text(L("本地运行，无账户、无遥测。\n基于 Colima、Docker CLI 和 SwiftUI。\n本项目是独立客户端，与 Docker 和 Colima 官方无隶属关系。"))
                     .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
                 Link(L("Colima 项目"), destination: URL(string: "https://github.com/abiosoft/colima")!)
             }.frame(maxWidth: .infinity, maxHeight: .infinity).tabItem { Label(L("关于"), systemImage: "info.circle") }
-        }.frame(width: 620, height: 590)
+        }.frame(width: 620, height: 590).modernControls()
             .onAppear { vmProxy = store.snapshot?.info.HTTPProxy ?? "" }
             .confirmationDialog(L("应用代理配置？"), isPresented: $applyProxy, titleVisibility: .visible) {
                 Button(L("保存并重启实例")) { saveProxy() }; Button(L("取消"), role: .cancel) {}
